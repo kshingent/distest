@@ -68,122 +68,175 @@
 
 測定は離散であるが、大本となる物理現象は連続であることが多い。このような場合、有界離散な測定から、非有界連続な物理的な確率分布に対する推定を行う必要がある。まず、理想的な非有界連続な確率分布を定義し、そこから導かれる有界離散な確率分布を導出する。
 
-観測データのサンプル数を $N$ とし、理想的な測定値を $\boldsymbol{y}_n \in \mathbb{R}^L$ 、説明変数行列を $\boldsymbol{x}_n \in \mathbb{R}^{K}$ 、回帰係数を $\boldsymbol{\beta}$ 、誤差項を $\boldsymbol{\varepsilon} \in \mathbb{R}^L$ とする。誤差の同時確率密度関数を $f$ 、そのパラメータ（スケールパラメータ $\sigma$ など）の集合を $\boldsymbol{\theta}$ とする。これに対応する同時累積分布関数を $\mathcal{F}(\boldsymbol{\varepsilon} \mid \boldsymbol{\theta})$ とする。また、第 $l$ 要素に関する周辺累積分布関数を $F_l( \cdot \mid \boldsymbol{\theta})$ と定義する。
+### 0. 変数および記法の定義
 
-### 1. 理想的に非有界連続な測定
-測定値ベクトル $\boldsymbol{y}_n$ は以下の非線形多変数回帰モデルに従う。
-$$\boldsymbol{y}_n = g(\boldsymbol{x}_n, \boldsymbol{\beta}) + \boldsymbol{\varepsilon} \quad (n=1, \dots, N)$$
-このとき、パラメータ $\boldsymbol{\beta}$ および $\boldsymbol{\theta}$ の下で測定値 $\boldsymbol{y}_n$ が得られる同時確率密度関数は、次のように記述される。
-$$p(\boldsymbol{y}_n \mid \boldsymbol{x}_n, \boldsymbol{\beta}, \boldsymbol{\theta}) = f(\boldsymbol{y}_n - g(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta})$$
+観測データのサンプル数を $N$ とし、真値としての応答変数 $\boldsymbol{y}_n \in \mathbb{R}^L$ と説明変数 $\boldsymbol{x}_n \in \mathbb{R}^{K}$ のペアを $\boldsymbol{z}_n$ と表す。回帰係数を $\boldsymbol{\beta}$、目的変数の観測誤差項を $\boldsymbol{\varepsilon} \in \mathbb{R}^L$、説明変数の観測誤差項を $\boldsymbol{\delta} \in \mathbb{R}^K$ とする。
+誤差 $\boldsymbol{\delta}$ の同時確率密度関数を $f$、そのパラメータ（スケールパラメータ $\sigma$ など）の集合を $\boldsymbol{\theta}$ とする。これに対応する同時累積分布関数を $\mathcal{F}(\boldsymbol{\delta} \mid \boldsymbol{\theta})$、第 $k$ 要素に関する周辺累積分布関数を $F_k( \cdot \mid \boldsymbol{\theta})$ と定義する。
+誤差 $\boldsymbol{\varepsilon}$ の同時確率密度関数を $g$、そのパラメータ（スケールパラメータ $\sigma$ など）の集合を $\boldsymbol{\phi}$ とする。これに対応する同時累積分布関数を $\mathcal{G}(\boldsymbol{\varepsilon} \mid \boldsymbol{\phi})$、第 $l$ 要素に関する周辺累積分布関数を $G_l( \cdot \mid \boldsymbol{\phi})$ と定義する。
+
+各変数において、上付き文字を用いて以下の状態を区別する：
+*   **連続極限**: $\cdot^\mathrm{C}$
+*   **非有界量子化**: $\cdot^\mathrm{Q}$
+*   **有界量子化**: $\cdot^{\bar{\mathrm{Q}}}$
+
+また、ペア変数 $\boldsymbol{z}$ については、構成要素の状態に応じて $\boldsymbol{z}^{(\mathrm{Q}, \mathrm{C})}$（$\boldsymbol{y}^\mathrm{Q}$ と $\boldsymbol{x}^\mathrm{C}$ のペア）のように表記し、両者が同状態の場合は $\boldsymbol{z}^\mathrm{Q} = \boldsymbol{z}^{(\mathrm{Q}, \mathrm{Q})}$ と省略して表記する場合がある。
 
 ---
 
-### 2. 量子化による測定（非有界離散）
-各要素 $y_{n,l}$ に対して、サンプルごとに定義された可算無限個の境界値 $\{b_{n,l,i}\}_{i \in \mathbb{Z}}$ を用いて離散化する写像 $Q_{n,l}$ を考える。測定結果を $\boldsymbol{z}_n \in \mathbb{R}^L$ とする。
-各区間の測定値は $v_{n,l,i} = \frac{b_{n,l,i-1} + b_{n,l,i}}{2}$ とする。
-特に、離散化が幅 $\Delta_{n,l}$ の等間隔である場合、境界値は適当なオフセット $c_{n,l}$ を用いて $b_{n,l,i} = b_{n,l,i-1} + \Delta_{n,l}$ と記述される。
+### 1. 非有界連続な測定 $\boldsymbol{z}^{(\mathrm{C}, \mathrm{C})}$
 
-$$z_{n,l} = Q_{n,l}(y_{n,l}) = v_{n,l,i} \quad \text{if} \quad b_{n,l,i-1} < y_{n,l} \le b_{n,l,i}$$
+量子化前の連続な測定値ベクトル $\boldsymbol{y}^\mathrm{C}_n$ および説明変数ベクトル $\boldsymbol{x}^\mathrm{C}_n$ は、以下の回帰モデルに従うとする。
 
-このとき、ベクトル $\boldsymbol{z}_n$ が観測される確率は、積分領域 $\mathcal{D}_{\boldsymbol{z}_n} = \prod_{l=1}^L (b_{n,l,i_l-1} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}), b_{n,l,i_l} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta})]$ を用いて次のように定式化される。
-$$P(\boldsymbol{z}_n \mid \boldsymbol{x}_n, \boldsymbol{\beta}, \boldsymbol{\theta}) = \int_{\mathcal{D}_{\boldsymbol{z}_n}} f(\boldsymbol{e} \mid \boldsymbol{\theta}) \, d\boldsymbol{e}$$
+$$
+\begin{cases} 
+\boldsymbol{x}^\mathrm{C}_n = \boldsymbol{x}_n + \boldsymbol{\delta} \\
+\boldsymbol{y}^\mathrm{C}_n = g(\boldsymbol{x}_n, \boldsymbol{\beta}) + \boldsymbol{\varepsilon}
+\end{cases} \quad (n=1, \dots, N)
+$$
+
+このとき、真値 $\boldsymbol{x}_n$ およびパラメータ $\boldsymbol{\beta}, \boldsymbol{\theta}, \boldsymbol{\phi}$ が与えられた下で、連続な観測ペア $\boldsymbol{z}_n^\mathrm{C} = (\boldsymbol{y}_n^\mathrm{C}, \boldsymbol{x}_n^\mathrm{C})$ が得られる同時確率密度関数 $p(\boldsymbol{z}_n^\mathrm{C} \mid \boldsymbol{x}_n, \boldsymbol{\beta}, \boldsymbol{\theta}, \boldsymbol{\phi})$ は次のように記述される。
+
+$$
+p(\boldsymbol{y}^\mathrm{C}_n, \boldsymbol{x}^\mathrm{C}_n \mid \boldsymbol{x}_n, \boldsymbol{\beta}, \boldsymbol{\theta}, \boldsymbol{\phi}) = g(\boldsymbol{y}^\mathrm{C}_n - h(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\phi}) \cdot f(\boldsymbol{x}^\mathrm{C}_n - \boldsymbol{x}_n \mid \boldsymbol{\theta})
+$$
+
+誤差の影響で説明変数の真値 $\boldsymbol{x}_n$ が未知である場合、パラメータ $\boldsymbol{\beta}, \boldsymbol{\theta}, \boldsymbol{\phi}$ の推定を行うのは最も難しい。この場合、①事前分布 $h(\boldsymbol{x}_n)$ を、事前知識から仮定して、尤度から真値 $\boldsymbol{x}_n$ を削除して最適化を行うか、②真値 $\boldsymbol{x}_n$ も含めて同時最適化で推定する。しかしながら、ここで詳しく述べないが、いずれの方法も計算上の困難がある。また、実用上、説明変数は理想的には誤差なく測定できるものとみなせる場合が多い。したがって、以下では説明変数の真値 $\boldsymbol{x}_n$ と説明変数の測定値$\boldsymbol{x}^\mathrm{C}_n$ は等しいものと仮定する。すなわち、
+
+$$
+\boldsymbol{y}^\mathrm{C}_n = g(\boldsymbol{x}^\mathrm{C}_n, \boldsymbol{\beta}) + \boldsymbol{\varepsilon} \quad (n=1, \dots, N)
+$$
+
+$$p(\boldsymbol{y}^\mathrm{C}_n, \boldsymbol{x}^\mathrm{C}_n \mid \boldsymbol{\beta}, \boldsymbol{\theta}, \boldsymbol{\phi}) = g(\boldsymbol{y}^\mathrm{C}_n - h(\boldsymbol{x}^\mathrm{C}_n, \boldsymbol{\beta}) \mid \boldsymbol{\phi})
+$$
+
+---
+
+### 2. 応答変数に対して非有界量子化測定が行われる場合 $\boldsymbol{z}^{(\mathrm{Q}, \mathrm{*})}$ 
+応答変数の各次元 $l$ に対して、サンプルごとに定義された可算無限個の境界値 $\{b_{l,i}^{y}\}_{i \in \mathbb{Z}}$ を用いて離散化する写像 $Q_{l}^{y}$ を考える。
+各区間の測定値は $v_{l,i}^{y} = \frac{b_{l,i-1}^{y} + b_{l,i}^{y}}{2}$ とする。
+特に、離散化が幅 $\Delta_{l}^{y}$ の等間隔である場合、 $b_{l,i}^{y} = b_{l,i-1}^{y} + \Delta_{l}^{y}$ と記述される。 $b_{l,i-1}^{y} < y_{n,l}^\mathrm{C} \le b_{l,i}^{y}$ を満たす $i$ を $i_{(n,l)}$ と書くことにすると、 $Q_{l}^{y}$ は以下のように $y_{n,l}^\mathrm{Q}$ と $y_{n,l}^\mathrm{C}$ を結びつける。
+
+$$
+y_{n,l}^\mathrm{Q} = Q_{l}(y_{n,l}^\mathrm{C}) = v_{l,i_{(n,l)}}^{y} \quad \text{if} \quad b_{l,i_{(n,l)}-1}^{y} < y_{n,l}^\mathrm{C} \le b_{l,i_{(n,l)}}^{y}
+$$
+
+このとき、ベクトル $\boldsymbol{y}_n^\mathrm{Q}$ が観測される確率は、積分領域 $\mathcal{D}_{\boldsymbol{y}_n^\mathrm{Q}} = \prod_{l=1}^L (b_{l,i_{(n,l)}-1}^{y} - h_l(\boldsymbol{x}_n^{(*)}, \boldsymbol{\beta}), b_{l,i_{(n,l)}}^{y} - h_l(\boldsymbol{x}_n^{(*)}, \boldsymbol{\beta})]$ を用いて次のように定式化される。
+
+$$
+P(\boldsymbol{y}_n^\mathrm{Q} \mid \boldsymbol{x}_n^{(*)}, \boldsymbol{\beta}, \boldsymbol{\theta}) = \int_{\mathcal{D}_{\boldsymbol{y}_n^\mathrm{Q}}} g(\boldsymbol{e} \mid \boldsymbol{\theta}) \, d\boldsymbol{e}
+$$
+
 また、周辺累積分布関数を用いることで、第 $l$ 要素の観測確率は次のように記述される。
-$$P(z_{n,l} = v_{n,l,i} \mid \boldsymbol{x}_n, \boldsymbol{\beta}, \boldsymbol{\theta}) = F_l(b_{n,l,i} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta}) - F_l(b_{n,l,i-1} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta})$$
+
+$$
+P(y_{n,l}^\mathrm{Q} = v_{l,i_{(n,l)}}^{y} \mid \boldsymbol{x}_n^{(*)}, \boldsymbol{\beta}, \boldsymbol{\theta}) = G_l(b_{l,i_{(n,l)}}^{y} - h_l(\boldsymbol{x}_n^{(*)}, \boldsymbol{\beta}) \mid \boldsymbol{\theta}) - G_l(b_{l,i_{(n,l)}-1} - h_l(\boldsymbol{x}_n^{(*)}, \boldsymbol{\beta}) \mid \boldsymbol{\theta})
+$$
 
 ---
 
 ### 3. 有限区間へのクリップを伴う測定（有界離散）
-各要素 $l$ ごとに有限個の境界値 $b_{n,l,0} < b_{n,l,1} < \dots < b_{n,l,M_{n,l}}$ によって定まる $M_{n,l}$ 個の測定値 $v_{n,l,1}, \dots, v_{n,l,M_{n,l}}$ へのクリップを考える。この測定結果を $\bar{\boldsymbol{z}}_n \in \mathbb{R}^L$ とする。
+各要素 $l$ ごとに有限個の境界値 $b_{l,0} < b_{l,1} < \dots < b_{l,M_{l}}$ によって定まる $M_{l}$ 個の測定値 $v_{l,1}, \dots, v_{l,M_{l}}$ へのクリップを考える。この測定結果を $\bar{\boldsymbol{z}}_n \in \mathbb{R}^L$ とする。
 各要素 $\bar{z}_{n,l}$ は、以下の写像によって得られる。
 
-*   $y_{n,l} \in (-\infty, b_{n,l,0}] \implies \bar{z}_{n,l} = v_{n,l,1}$
-*   $y_{n,l} \in (b_{n,l,i-1}, b_{n,l,i}] \implies \bar{z}_{n,l} = v_{n,l,i} \quad (i = 1, \dots, M_{n,l})$
-*   $y_{n,l} \in (b_{n,l,M_{n,l}}, \infty) \implies \bar{z}_{n,l} = v_{n,l,M_{n,l}}$
+*   $y_{n,l} \in (-\infty, b_{l,0}] \implies \bar{z}_{n,l} = v_{l,1}$
+*   $y_{n,l} \in (b_{l,i-1}, b_{l,i}] \implies \bar{z}_{n,l} = v_{l,i} \quad (i = 1, \dots, M_{l})$
+*   $y_{n,l} \in (b_{l,M_{l}}, \infty) \implies \bar{z}_{n,l} = v_{l,M_{l}}$
 
 この確率は、周辺累積分布関数を用いて以下のように整理される。
-*   $i_l = 1$ のとき： $P(\bar{z}_{n,l} = v_{n,l,1}) = F_l(b_{n,l,0} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta})$
-*   $i_l \in \{2, \dots, M_{n,l}-1\}$ のとき： $P(\bar{z}_{n,l} = v_{n,l,i_l}) = F_l(b_{n,l,i_l} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta}) - F_l(b_{n,l,i_l-1} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta})$
-*   $i_l = M_{n,l}$ のとき： $P(\bar{z}_{n,l} = v_{n,l,M_{n,l}}) = 1 - F_l(b_{n,l,M_{n,l}} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta})$
+*   $i_l = 1$ のとき： $P(\bar{z}_{n,l} = v_{l,1}) = F_l(b_{l,0} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta})$
+*   $i_l \in \{2, \dots, M_{l}-1\}$ のとき： $P(\bar{z}_{n,l} = v_{l,i_l}) = F_l(b_{l,i_l} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta}) - F_l(b_{l,i_l-1} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta})$
+*   $i_l = M_{l}$ のとき： $P(\bar{z}_{n,l} = v_{l,M_{l}}) = 1 - F_l(b_{l,M_{l}} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta})$
 
-ここで、等間隔離散化（幅 $\Delta_{n,l}$）かつ有界なケースにおいては、境界値は $b_{n,l,i} = b_{n,l,0} + i \cdot \Delta_{n,l}$ となり、各積分区間 $I_{n,l,i_l}$ は以下のように具体化される。
+ここで、等間隔離散化（幅 $\Delta_{l}$）かつ有界なケースにおいては、境界値は $b_{l,i} = b_{l,0} + i \cdot \Delta_{l}$ となり、各積分区間 $I_{l,i_l}$ は以下のように具体化される。
 
-*   $i_l = 1$ のとき： $I_{n,l,1} = (-\infty, b_{n,l,0} + \Delta_{n,l} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta})]$
-*   $i_l \in \{2, \dots, M_{n,l}-1\}$ のとき： $I_{n,l,i_l} = (b_{n,l,0} + (i_l-1)\Delta_{n,l} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}), \,\, b_{n,l,0} + i_l\Delta_{n,l} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta})]$
-*   $i_l = M_{n,l}$ のとき： $I_{n,l,M_{n,l}} = (b_{n,l,0} + (M_{n,l}-1)\Delta_{n,l} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}), \infty)$
+*   $i_l = 1$ のとき： $I_{l,1} = (-\infty, b_{l,0} + \Delta_{l} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta})]$
+*   $i_l \in \{2, \dots, M_{l}-1\}$ のとき： $I_{l,i_l} = (b_{l,0} + (i_l-1)\Delta_{l} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}), \,\, b_{l,0} + i_l\Delta_{l} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta})]$
+*   $i_l = M_{l}$ のとき： $I_{l,M_{l}} = (b_{l,0} + (M_{l}-1)\Delta_{l} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}), \infty)$
 
-このとき、ベクトル $\bar{\boldsymbol{z}}_n$ が観測される確率は、要素ごとのインデックス $i_l \in \{1, \dots, M_{n,l}\}$ に応じた積分区間 $I_{n,l,i_l}$ の直積領域 $\mathcal{D}_{\bar{\boldsymbol{z}}_n} = \prod_{l=1}^L I_{n,l,i_l}$ 上の重積分として定式化される。
+このとき、ベクトル $\bar{\boldsymbol{z}}_n$ が観測される確率は、要素ごとのインデックス $i_l \in \{1, \dots, M_{l}\}$ に応じた積分区間 $I_{l,i_l}$ の直積領域 $\mathcal{D}_{\bar{\boldsymbol{z}}_n} = \prod_{l=1}^L I_{l,i_l}$ 上の重積分として定式化される。
 
-$$P(\bar{\boldsymbol{z}}_n \mid \boldsymbol{x}_n, \boldsymbol{\beta}, \boldsymbol{\theta}) = \int_{\mathcal{D}_{\bar{\boldsymbol{z}}_n}} f(\boldsymbol{e} \mid \boldsymbol{\theta}) \, d\boldsymbol{e}$$
+$$
+P(\bar{\boldsymbol{z}}_n \mid \boldsymbol{x}_n, \boldsymbol{\beta}, \boldsymbol{\theta}) = \int_{\mathcal{D}_{\bar{\boldsymbol{z}}_n}} f(\boldsymbol{e} \mid \boldsymbol{\theta}) \, d\boldsymbol{e}
+$$
 
 ## 理論的支柱②：統計的推定の基本性質とロバスト性の定量的指標
 
 ロバスト推定の妥当性を評価するため、その基盤となる統計的推定の諸性質を整理する。詳細な数学的証明については、Casella & Berger (2001) 等の古典的文献を参照されたい。
 
 ### 1. 推定量の定式化
-前章「理論的支柱①」の表記に基づき、サンプルサイズを $N$ とする。ここで、推定対象である回帰係数 $\boldsymbol{\beta}$ と誤差項のパラメータ $\boldsymbol{\theta}$ を統合した全パラメータベクトルを $\boldsymbol{\xi} = [\boldsymbol{\beta}^\top, \boldsymbol{\theta}^\top]^\top$ と定義する。推定結果は「どの観測プロセスを経て得られたデータを用いるか」に依存するため、本稿では以下の通り推定量を区別して記述し、具体例として最尤推定量（MLE） $T_{\mathrm{MLE}}$ の形式を示す。
+前章「理論的支柱①」の表記に基づき、サンプルサイズを $N$ とする。ここで、推定対象である回帰係数 $\boldsymbol{\beta}$ と誤差項のパラメータ $\boldsymbol{\theta}$ を統合した全パラメータベクトルを $\boldsymbol{\xi} = [\boldsymbol{\beta}^\top, \boldsymbol{\theta}^\top]^\top$ と定義する。その一部分や各要素を指す任意の部分パラメータ $\boldsymbol{\zeta}$ とする。推定結果は「どの観測プロセスを経て得られたデータを用いるか」に依存するため、本稿では以下の通り推定量を区別して記述し、具体例として最尤推定量（MLE） $T_{\mathrm{MLE}}$ の形式を示す。
 
-*   **理想推定量 $\hat{\boldsymbol{\xi}}_N$ （連続観測に基づく）**
+*   **理想推定量 $\hat{\boldsymbol{\zeta}}_N^C$ （連続観測に基づく）**
     物理現象としての連続値 $\boldsymbol{y}_n$ に直接アクセスできると仮定した場合の推定量である。
-    *   **定義**: $\hat{\boldsymbol{\xi}}_N = T(F_{N, y})$
-    *   **MLEの具体例**: $\hat{\boldsymbol{\xi}}_{N, \mathrm{MLE}} = \arg \max_{\boldsymbol{\xi}} \sum_{n=1}^N \log f(\boldsymbol{y}_n - g(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta})$
+    *   **定義**: $\hat{\boldsymbol{\zeta}}_N^C = T(F_{N, y})$
+    *   **MLEの具体例**: $\hat{\boldsymbol{\xi}}_{N, \mathrm{MLE}}^C = \arg \max_{\boldsymbol{\xi}} \sum_{n=1}^N \log f(\boldsymbol{y}_n - g(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta})$
     *   **性質**: データの微小な変化に対して推定値が滑らかに変化する「連続性」を備えており、理論上の参照点となる。
 
-*   **量子化推定量 $\hat{\boldsymbol{\xi}}_N^Q$ （離散観測に基づく）**
+*   **量子化推定量 $\hat{\boldsymbol{\zeta}}_N^Q$ （離散観測に基づく）**
     量子化写像 $Q$ によって離散化されたデータ $\boldsymbol{z}_n$ に基づく推定量である。
-    *   **定義**: $\hat{\boldsymbol{\xi}}_N^Q = T(F_{N, z})$
+    *   **定義**: $\hat{\boldsymbol{\zeta}}_N^Q = T(F_{N, z})$
     *   **MLEの具体例**: $\hat{\boldsymbol{\xi}}_{N, \mathrm{MLE}}^Q = \arg \max_{\boldsymbol{\xi}} \sum_{n=1}^N \log P(\boldsymbol{z}_n \mid \boldsymbol{x}_n, \boldsymbol{\xi})$
-    *   **性質**: 観測が離散的であるため、真の分布 $F_{\boldsymbol{\xi}}$ との間に「量子化バイアス」が生じる。特にメディアンなどは、データのわずかな変化で推定値が不連続に跳ねる不安定性を持つ。
+    *   **性質**: 観測が離散的であるため、真の分布 $F_{\boldsymbol{\zeta}}$ との間に「量子化バイアス」が生じる。特にメディアンなどは、データのわずかな変化で推定値が不連続に跳ねる不安定性を持つ。
 
-*   **有界量子化推定量 $\bar{\boldsymbol{\xi}}_N^Q$ （クリップあり離散観測に基づく）**
+*   **有界量子化推定量 $\bar{\boldsymbol{\zeta}}_N^Q$ （クリップあり離散観測に基づく）**
     有限の測定範囲でクリップされたデータ $\bar{\boldsymbol{z}}_n$ に基づく推定量である。
-    *   **定義**: $\bar{\boldsymbol{\xi}}_N^Q = T(F_{N, \bar{z}})$
+    *   **定義**: $\bar{\boldsymbol{\zeta}}_N^Q = T(F_{N, \bar{z}})$
     *   **MLEの具体例**: $\bar{\boldsymbol{\xi}}_{N, \mathrm{MLE}}^Q = \arg \max_{\boldsymbol{\xi}} \sum_{n=1}^N \log P(\bar{\boldsymbol{z}}_n \mid \boldsymbol{x}_n, \boldsymbol{\xi})$
     *   **性質**: 測定器のダイナミックレンジ外の情報が欠落している。この制約下で不偏性を確保するためには、期待値操作により真の値を抽出する工夫が必要となる。
 
 | 観測データ | 推定量の記号 | 考慮すべき副作用 | ロバスト性への影響 |
 | :--- | :--- | :--- | :--- |
-| **連続値 $\boldsymbol{y}_n$** | $\hat{\boldsymbol{\xi}}_N$ | なし（理想状態） | 影響関数が有界なら安定 |
-| **離散値 $\boldsymbol{z}_n$** | $\hat{\boldsymbol{\xi}}_N^Q$ | 量子化誤差 | 離散性による推定値のジャンプ |
-| **有界離散 $\bar{\boldsymbol{z}}_n$** | $\bar{\boldsymbol{\xi}}_N^Q$ | 情報の欠落・バイアス | 系統的な誤差（要バイアス補正） |
+| **連続値 $\boldsymbol{y}_n$** | $\hat{\boldsymbol{\zeta}}_N^C$ | なし（理想状態） | 影響関数が有界なら安定 |
+| **離散値 $\boldsymbol{z}_n$** | $\hat{\boldsymbol{\zeta}}_N^Q$ | 量子化誤差 | 離散性による推定値のジャンプ |
+| **有界離散 $\bar{\boldsymbol{z}}_n$** | $\bar{\boldsymbol{\zeta}}_N^Q$ | 情報の欠落・バイアス | 系統的な誤差（要バイアス補正） |
 
 ### 推定量の基本的性質
 
 *   **一致性（Consistency）**
     推定量が真の値に収束する性質。
-    *   **弱一致性**: 任意の $\epsilon > 0$ に対し $\lim_{N \to \infty} P(|\hat{\theta}_N - \theta| < \epsilon) = 1$ （確率収束：$\hat{\theta}_N \xrightarrow{p} \theta$）。
-    *   **強一致性**: $P(\lim_{N \to \infty} \hat{\theta}_N = \theta) = 1$ （ほとんど確実な収束：$\hat{\theta}_N \xrightarrow{\mathrm{a.s.}} \theta$）。
-    *   **判定条件**: 平均二乗誤差（MSE）が $0$ に収束すれば、その推定量は一致性を持つ（$\mathrm{E}[(\hat{\theta}_N - \theta)^2] \to 0$）。
+    *   **弱一致性**: 任意の $\epsilon > 0$ に対し $\lim_{N \to \infty} P(|\hat{\boldsymbol{\zeta}}_N - \boldsymbol{\zeta}| < \epsilon) = 1$ （確率収束：$\hat{\boldsymbol{\zeta}}_N \xrightarrow{p} \boldsymbol{\zeta}$）。
+    *   **強一致性**: $P(\lim_{N \to \infty} \hat{\boldsymbol{\zeta}}_N = \boldsymbol{\zeta}) = 1$ （ほとんど確実な収束：$\hat{\boldsymbol{\zeta}}_N \xrightarrow{\mathrm{a.s.}} \boldsymbol{\zeta}$）。
+    *   **判定条件**: 平均二乗誤差（MSE）が $0$ に収束すれば、その推定量は一致性を持つ（$\mathbb{E}[(\hat{\boldsymbol{\zeta}}_N - \boldsymbol{\zeta})^2] \to 0$）。
 *   **不偏性（Unbiasedness）**
-    推定量の期待値が真の値に一致する性質。$\mathrm{E}[\hat{\theta}_N] = \theta$。
-    *   **バイアス（Bias）**: $\mathrm{Bias}(\hat{\theta}_N) = \mathrm{E}[\hat{\theta}_N] - \theta$。不偏推定量ではこれが常に $0$ となる。
-    *   **漸近不偏性**: $\lim_{N \to \infty} \mathrm{Bias}(\hat{\theta}_N) = 0$。
+    推定量の期待値が真の値に一致する性質。$\mathbb{E}[\hat{\boldsymbol{\zeta}}_N] = \boldsymbol{\zeta}$。
+    *   **バイアス（Bias）**: $\mathrm{Bias}(\hat{\boldsymbol{\zeta}}_N) = \mathbb{E}[\hat{\boldsymbol{\zeta}}_N] - \boldsymbol{\zeta}$。不偏推定量ではこれが常に $0$ となる。
+    *   **漸近不偏性**: $\lim_{N \to \infty} \mathrm{Bias}(\hat{\boldsymbol{\zeta}}_N) = 0$。
 *   **フィッシャー一致性（Fisher Consistency）**
-    推定量を分布 $F$ の汎関数 $T(F)$ と定義した際、$T(F_\theta) = \theta$ が成立すること。経験分布 $F_N$ が真の分布 $F_\theta$ に収束する場合（Glivenko–Cantelliの定理等）、連続な汎関数 $T$ を通じて $\hat{\theta}_N = T(F_N)$ は $\theta$ に確率収束（弱一致）する。
+    推定量を分布 $F$ の汎関数 $T(F)$ と定義した際、$T(F_{\boldsymbol{\zeta}}) = \boldsymbol{\zeta}$ が成立すること。経験分布 $F_N$ が真の分布 $F_{\boldsymbol{\zeta}}$ に収束する場合（Glivenko–Cantelliの定理等）、連続な汎関数 $T$ を通じて $\hat{\boldsymbol{\zeta}}_N = T(F_N)$ は $\boldsymbol{\zeta}$ に確率収束（弱一致）する。
 *   **効率性（Efficiency）**
-    不偏推定量のクラス内で分散 $V[\hat{\theta}_N]$ が最小であることを指す。
-    *   **相対効率（Relative Efficiency）**: 二つの不偏推定量 $\hat{\theta}_1, \hat{\theta}_2$ の分散比 $V[\hat{\theta}_2] / V[\hat{\theta}_1]$。
+    不偏推定量のクラス内で分散共分散行列 $\mathrm{V}[\hat{\boldsymbol{\zeta}}_N]$ が最小（行列の順序関係において下限を達成）であることを指す。
+    *   **相対効率（Relative Efficiency）**: 二つの不偏推定量 $\hat{\boldsymbol{\zeta}}_1, \hat{\boldsymbol{\zeta}}_2$ の分散共分散行列の比較。行列式（Generalized Variance）の比や、トレースの比などで評価される。
 *   **漸近正規性（Asymptotic Normality）**
-    $N \to \infty$ において、推定量の分布が正規分布に法則収束する性質。
-    $$\sqrt{N}(\hat{\theta}_N - \theta) \xrightarrow{d} N(0, \sigma_{\mathrm{asym}}^2)$$
-    ここで $\sigma_{\mathrm{asym}}^2$ は**漸近分散**である。これにより、中心極限定理を基礎とした信頼区間の構築や仮説検定が可能となる。
+    $N \to \infty$ において、推定量の分布が多変量正規分布に法則収束する性質。
+    $$
+    \sqrt{N}(\hat{\boldsymbol{\zeta}}_N - \boldsymbol{\zeta}) \xrightarrow{d} N(\boldsymbol{0}, \boldsymbol{\Sigma}_{\mathrm{asym}})
+    $$
+    ここで $\boldsymbol{\Sigma}_{\mathrm{asym}}$ は漸近分散共分散行列である。これにより、特定の要素間の一致性や相関を考慮した信頼領域の構築が可能となる。
 *   **不変性・共変性（Invariance / Equivariance）**
     データの変換（平行移動、スケーリング等）に対し、推定結果が適切に連動する性質。
-    *   **不変性**: 変換 $g$ に対し $T(g(x)) = T(x)$。
-    *   **共変性**: 変換 $g$ とそれに対応するパラメータ変換 $\bar{g}$ に対し $T(g(x)) = \bar{g}(T(x))$。
+    *   **不変性**: 変換 $g$ に対し $\boldsymbol{T}(g(x)) = \boldsymbol{T}(x)$。。
+    *   **共変性**: 変換 $g$ とそれに対応するパラメータ変換 $\boldsymbol{T}(g(x)) = \bar{g}(\boldsymbol{T}(x))$。
 
 ### 2. 情報理論的指標と最適性
 
-*   **フィッシャー情報量（Fisher Information）**
-    パラメータ $\theta$ に関して観測データが持つ情報量の尺度。
-    $$I_N(\theta) = E\left[ \left( \frac{\partial}{\partial \theta} \log P(\bar{\boldsymbol{z}}_n \mid \theta) \right)^2 \right]$$
+*   **フィッシャー情報行列（Fisher Information Matrix）**
+    全パラメータベクトル $\boldsymbol{\xi}$ に関して観測データが持つ情報量の尺度。行列形式で定義される。
+    $$
+    \boldsymbol{I}_N(\boldsymbol{\xi}) = \mathrm{E}\left[ \left( \nabla_{\boldsymbol{\xi}} \log P(\bar{\boldsymbol{z}}_n \mid \boldsymbol{\xi}) \right) \left( \nabla_{\boldsymbol{\xi}} \log P(\bar{\boldsymbol{z}}_n \mid \boldsymbol{\xi}) \right)^\top \right]
+    $$
+    特定の要素 $\boldsymbol{\zeta}$ に関する情報量は、この行列の対応する成分、あるいは他のパラメータを固定した条件下でのスコア関数の分散として議論される。
 *   **クラメール・ラオの下限（Cramér-Rao Lower Bound; CRLB）**
-    不偏推定量の分散が達成可能な理論的下限。$V[\hat{\theta}_N] \ge 1 / I_N(\theta)$。
+    不偏推定量の分散共分散行列が達成可能な理論的下限。多変数の場合、行列の順序関係（半正定値性の意味）として以下が成立する。
+    $$
+    \mathrm{V}[\hat{\boldsymbol{\xi}}_N] \succeq \boldsymbol{I}_N(\boldsymbol{\xi})^{-1}
+    $$
+    特定の要素 $\boldsymbol{\zeta}$ に対する不偏推定量の分散 $V[\hat{\boldsymbol{\zeta}}_N]$ は、フィッシャー情報行列の逆行列 $\boldsymbol{I}_N(\boldsymbol{\xi})^{-1}$ の対応する対角成分によって下限が規定される。
 *   **有効推定量（Efficient Estimator）**
-    CRLBを達成する推定量。その効率（$\text{Efficiency} = \frac{1/I_N(\theta)}{V[\hat{\theta}_N]}$）は $1$ となる。
+    CRLBを達成する推定量。全要素、あるいは特定の注目要素 $\boldsymbol{\zeta}$ において下限を達成しているかどうかが評価の対象となる。
 *   **漸近有効性（Asymptotic Efficiency）**
-    $N \to \infty$ で漸近分散が最小（CRLBの漸近版を達成）となる性質。最尤推定量（MLE）は、正則条件の下でこの性質を持つ。
+    $N \to \infty$ において、漸近分散共分散行列がフィッシャー情報行列の逆行列（の漸近版）と一致する性質。最尤推定量（MLE）は、適切な正則条件の下で、全パラメータ $\boldsymbol{\xi}$ に対してこの性質を持つ。
 *   **漸近相対効率（Asymptotic Relative Efficiency; ARE）**
-    二つの推定量の漸近分散の比。ロバスト推定では、理想的なガウス分布下でのARE（例：対MLEで95%）を確保しつつ、汚染環境下での精度低下を防ぐ設計を行う。
+    二つの推定量の漸近分散（行列の成分または行列式等）の比。特定の要素 $\boldsymbol{\zeta}$ ごとに算出され、ガウス分布等の理想条件下での精度と、汚染環境下でのロバスト性のトレードオフを評価するために用いられる。
 
 ### 3. ロバスト性を評価する定量的指標
 古典的文献 において確立された、モデルの誤設定や外れ値に対する耐性の尺度である。
@@ -194,7 +247,9 @@ $$P(\bar{\boldsymbol{z}}_n \mid \boldsymbol{x}_n, \boldsymbol{\beta}, \boldsymbo
     *   標本中央値（メディアン）の崩壊点は $0.5$（強靭）。
 *   **影響関数（Influence Function; IF）**
     分布 $F$ に対して一点 $x$ に微小な汚染（点質量 $\delta_x$）を加えた際、推定機能 $T$ が受ける変化の割合を記述するローカルな尺度。
-    $$IF(x; T, F) = \lim_{\epsilon \downarrow 0} \frac{T((1-\epsilon)F + \epsilon \delta_x) - T(F)}{\epsilon}$$
+    $$
+    IF(x; T, F) = \lim_{\epsilon \downarrow 0} \frac{T((1-\epsilon)F + \epsilon \delta_x) - T(F)}{\epsilon}
+    $$
     良好なロバスト推定量が備えるべき影響関数の性質は以下の通り。
     *   **有界性（Boundedness）**: $x$ が無限遠にあっても影響が一定値に抑えられること。これにより外れ値混入時の漸近分散の爆発を防ぐ。
     *   **連続性（Continuity）**: データの微小な変化に対して推定値が滑らかに変化すること。これにより量子化等の丸め誤差に対して漸近正規性が不安定になるのを防ぐ。
@@ -248,7 +303,9 @@ $$P(\bar{\boldsymbol{z}}_n \mid \boldsymbol{x}_n, \boldsymbol{\beta}, \boldsymbo
 
 具体的には、未知の信号 $x$（ただし $|x| \le \lambda$）に対し、一様乱数 $\tau \sim U[-1, 1]$ を加え、その符号のみを観測する $y = \text{sign}(x + \lambda \tau)$ という 1-bit 量子化を考える。このとき、期待値操作によって以下の関係が導かれる。
 
-$$\mathbb{E}[\lambda \cdot \text{sign}(x + \lambda \tau)] = x$$
+$$
+\mathbb{E}[\lambda \cdot \text{sign}(x + \lambda \tau)] = x
+$$
 
 このディザリングされた 1-bit 観測値を基に、トリム平均や中央値の概念を導入することで、汚染率 $\epsilon$ に対してミニマックス最適な誤差レートを達成するロバスト推定器を構築できることが証明されている[^8]。この手法の意義は、物理的な「ビットの制約」と統計的な「外れ値への耐性」を、数学的に同一の枠組みで最適化できる点にある。
 
