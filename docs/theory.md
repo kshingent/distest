@@ -132,32 +132,52 @@ $$
 P(y_{n,l}^\mathrm{Q} = v_{l,i_{(n,l)}}^{y} \mid \boldsymbol{x}_n^{(*)}, \boldsymbol{\beta}, \boldsymbol{\theta}) = G_l(b_{l,i_{(n,l)}}^{y} - h_l(\boldsymbol{x}_n^{(*)}, \boldsymbol{\beta}) \mid \boldsymbol{\theta}) - G_l(b_{l,i_{(n,l)}-1} - h_l(\boldsymbol{x}_n^{(*)}, \boldsymbol{\beta}) \mid \boldsymbol{\theta})
 $$
 
+誤差項 $\boldsymbol{\varepsilon}$ の各要素が独立な場合はこの式を用いて計算を簡単化することが可能になる。
+
 ---
 
-### 3. 有限区間へのクリップを伴う測定（有界離散）
-各要素 $l$ ごとに有限個の境界値 $b_{l,0} < b_{l,1} < \dots < b_{l,M_{l}}$ によって定まる $M_{l}$ 個の測定値 $v_{l,1}, \dots, v_{l,M_{l}}$ へのクリップを考える。この測定結果を $\bar{\boldsymbol{z}}_n \in \mathbb{R}^L$ とする。
-各要素 $\bar{z}_{n,l}$ は、以下の写像によって得られる。
+### 3. 説明変数に対して非有界量子化測定が行われる場合 $\boldsymbol{z}^{(*, \mathrm{Q})}$
 
-*   $y_{n,l} \in (-\infty, b_{l,0}] \implies \bar{z}_{n,l} = v_{l,1}$
-*   $y_{n,l} \in (b_{l,i-1}, b_{l,i}] \implies \bar{z}_{n,l} = v_{l,i} \quad (i = 1, \dots, M_{l})$
-*   $y_{n,l} \in (b_{l,M_{l}}, \infty) \implies \bar{z}_{n,l} = v_{l,M_{l}}$
+説明変数の各次元 $k$ に対しても、応答変数と同様に可算無限個の境界値 $\{b_{k,j}^{x}\}_{j \in \mathbb{Z}}$ を用いて離散化する写像 $Q_{k}^{x}$ を考える。各区間の代表値を $v_{k,j}^{x} = \frac{b_{k,j-1}^{x} + b_{k,j}^{x}}{2}$ とする。
+
+「1. 非有界連続な測定」における仮定 $\boldsymbol{x}_n^\mathrm{C} = \boldsymbol{x}_n$ に従えば、量子化された説明変数 $x_{n,k}^\mathrm{Q}$ は真値 $x_{n,k}$ が属する区間に基づいて一意に決定される。すなわち、境界値 $b_{k,j_{(n,k)}-1}^{x} < x_{n,k} \le b_{k,j_{(n,k)}}^{x}$ を満たすインデックス $j_{(n,k)}$ を用いて、以下のように写像される。
+
+$$
+x_{n,k}^\mathrm{Q} = Q_{k}^{x}(x_{n,k}) = v_{k,j_{(n,k)}}^{x}
+$$
+
+この量子化プロセスが推定に与える影響を定式化するため、応答変数 $\boldsymbol{y}_n^{(*)}$ と量子化された説明変数 $\boldsymbol{x}_n^\mathrm{Q}$ の同時確率を考える。説明変数の量子化は、本来連続的な値をとるはずの $h(\boldsymbol{x}_n, \boldsymbol{\beta})$ の入力を離散的なセルへと強制的に格子化することを意味する。
+
+ここで、観測者がアクセス可能な情報が $\boldsymbol{x}_n^\mathrm{Q}$ のみである場合、真値 $\boldsymbol{x}_n$ は区間 $\mathcal{I}_{\boldsymbol{x}_n^\mathrm{Q}} = \prod_{k=1}^K (b_{k,j_{(n,k)}-1}^{x}, b_{k,j_{(n,k)}}^{x}]$ 内のいずれかの点であるという不確実性が生じる。したがって、パラメータ $\boldsymbol{\beta}$ に関する尤度を構成する際、真値 $\boldsymbol{x}_n$ がこの区間内に一様に分布すると仮定（あるいは特定の事前分布 $p(\boldsymbol{x}_n)$ を想定）するならば、$\boldsymbol{y}_n^{(*)}$ が観測される確率は、この区間上での積分（期待値操作）として以下のように記述される。
+
+$$
+p(\boldsymbol{y}_n^{(*)} \mid \boldsymbol{x}_n^\mathrm{Q}, \boldsymbol{\beta}, \boldsymbol{\theta}) = \frac{1}{\text{Vol}(\mathcal{I}_{\boldsymbol{x}_n^\mathrm{Q}})} \int_{\mathcal{I}_{\boldsymbol{x}_n^\mathrm{Q}}} p(\boldsymbol{y}_n^{(*)} \mid \boldsymbol{x}, \boldsymbol{\beta}, \boldsymbol{\theta}) \, d\boldsymbol{x}
+$$
+
+特に、応答変数も量子化されている場合（$\boldsymbol{z}^\mathrm{Q} = (\boldsymbol{y}_n^\mathrm{Q}, \boldsymbol{x}_n^\mathrm{Q})$）は、「2. 応答変数に対して非有界量子化測定が行われる場合」で定義した積分領域 $\mathcal{D}_{\boldsymbol{y}_n^\mathrm{Q}}$ を用いて、次のように二重の積分構造を持つ。
+
+$$
+P(\boldsymbol{y}_n^\mathrm{Q} \mid \boldsymbol{x}_n^\mathrm{Q}, \boldsymbol{\beta}, \boldsymbol{\theta}) = \frac{1}{\text{Vol}(\mathcal{I}_{\boldsymbol{x}_n^\mathrm{Q}})} \int_{\mathcal{I}_{\boldsymbol{x}_n^\mathrm{Q}}} \left( \int_{\mathcal{D}_{\boldsymbol{y}_n^\mathrm{Q}, \boldsymbol{x}}} g(\boldsymbol{e} \mid \boldsymbol{\theta}) \, d\boldsymbol{e} \right) d\boldsymbol{x}
+$$
+
+ここで $\mathcal{D}_{\boldsymbol{y}_n^\mathrm{Q}, \boldsymbol{x}}$ は、積分変数 $\boldsymbol{x}$ に依存して変化する応答変数の誤差領域である。このように、説明変数の量子化はモデルの非線形性を通じて、単なる加法的ノイズ以上の複雑なバイアスを推定プロセスに混入させる要因となる。
+
+---
+
+### 4. 有限区間へのクリップを伴う測定（有界離散）
+応答変数 $y$ に対して記述する。各要素 $l$ （ $x$ の場合は $k$ ）ごとに有限個の境界値 $b_{l,0}^{y} < b_{l,1}^{y} < \dots < b_{l,M_{l}^{y}}^{y}$ によって定まる $M_{l}^{y}$ 個の測定値 $v_{l,1}^{y}, \dots, v_{l,M_{l}^{y}}^{y}$ へのクリップを考える。この測定結果を $\boldsymbol{y}_n^{\bar{\mathrm{Q}}} \in \mathbb{R}^L$ とする。
+各要素 $y_{n,l}^{\bar{\mathrm{Q}}}$ は、以下の写像によって得られる。
+
+*   $y_{n,l}^\mathrm{C} \in (-\infty, b_{l,0}^{y}] \implies y_{n,l}^{\bar{\mathrm{Q}}} = v_{l,1}^{y}$
+*   $y_{n,l}^\mathrm{C} \in (b_{l,i_{n,l}-1}^{y}, b_{l,i_{n,l}}^{y}] \implies y_{n,l}^{\bar{\mathrm{Q}}} = v_{l,i_{n,l}}^{y} \quad (i_{n,l} = 1, \dots, M_{l}^{y})$
+*   $y_{n,l}^\mathrm{C} \in (b_{l,M_{l}^{y}}, \infty) \implies y_{n,l}^{\bar{\mathrm{Q}}} = v_{l,M_{l}^{y}}$
 
 この確率は、周辺累積分布関数を用いて以下のように整理される。
-*   $i_l = 1$ のとき： $P(\bar{z}_{n,l} = v_{l,1}) = F_l(b_{l,0} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta})$
-*   $i_l \in \{2, \dots, M_{l}-1\}$ のとき： $P(\bar{z}_{n,l} = v_{l,i_l}) = F_l(b_{l,i_l} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta}) - F_l(b_{l,i_l-1} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta})$
-*   $i_l = M_{l}$ のとき： $P(\bar{z}_{n,l} = v_{l,M_{l}}) = 1 - F_l(b_{l,M_{l}} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta})$
+*   $i_{n,l} = 1$ のとき： $P(\bar{z}_{n,l} = v_{l,1}) = G_l(b_{l,0} - h_l(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta})$
+*   $i_{n,l} \in \{2, \dots, M_{l}-1\}$ のとき： $P(\bar{z}_{n,l} = v_{l,i_{n,l}}) = G_l(b_{l,i_{n,l}} - h_l(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta}) - G_l(b_{l,i_{n,l}-1} - h_l(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta})$
+*   $i_{n,l} = M_{l}^{y}$ のとき： $P(\bar{z}_{n,l} = v_{l,M_{l}}) = 1 - G_l(b_{l,M_{l}} - h_l(\boldsymbol{x}_n, \boldsymbol{\beta}) \mid \boldsymbol{\theta})$
 
-ここで、等間隔離散化（幅 $\Delta_{l}$）かつ有界なケースにおいては、境界値は $b_{l,i} = b_{l,0} + i \cdot \Delta_{l}$ となり、各積分区間 $I_{l,i_l}$ は以下のように具体化される。
-
-*   $i_l = 1$ のとき： $I_{l,1} = (-\infty, b_{l,0} + \Delta_{l} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta})]$
-*   $i_l \in \{2, \dots, M_{l}-1\}$ のとき： $I_{l,i_l} = (b_{l,0} + (i_l-1)\Delta_{l} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}), \,\, b_{l,0} + i_l\Delta_{l} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta})]$
-*   $i_l = M_{l}$ のとき： $I_{l,M_{l}} = (b_{l,0} + (M_{l}-1)\Delta_{l} - g_l(\boldsymbol{x}_n, \boldsymbol{\beta}), \infty)$
-
-このとき、ベクトル $\bar{\boldsymbol{z}}_n$ が観測される確率は、要素ごとのインデックス $i_l \in \{1, \dots, M_{l}\}$ に応じた積分区間 $I_{l,i_l}$ の直積領域 $\mathcal{D}_{\bar{\boldsymbol{z}}_n} = \prod_{l=1}^L I_{l,i_l}$ 上の重積分として定式化される。
-
-$$
-P(\bar{\boldsymbol{z}}_n \mid \boldsymbol{x}_n, \boldsymbol{\beta}, \boldsymbol{\theta}) = \int_{\mathcal{D}_{\bar{\boldsymbol{z}}_n}} f(\boldsymbol{e} \mid \boldsymbol{\theta}) \, d\boldsymbol{e}
-$$
+このとき、ベクトル $\boldsymbol{y}_n^{\bar{\mathrm{Q}}}$ が観測される確率は、要素ごとのインデックス $i_{n,l} \in \{1, \dots, M_{l}^{y}\}$ に応じた積分区間 $I_{l,i_{n,l}}^{y}$ の直積領域 $\mathcal{D}_{\boldsymbol{y}_n^{\bar{\mathrm{Q}}}}$ 上の重積分として定式化される。
 
 ## 理論的支柱②：統計的推定の基本性質とロバスト性の定量的指標
 
